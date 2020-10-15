@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.Todo_List_Demo">
+<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="To-day list"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MyHistory"
+            android:label="To-day list"
+            android:theme="@style/AppTheme"
+            ></activity>
+        <activity android:name=".SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TODO"
+            android:label="Todo List"
+
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".Settings"
+
+            android:label="Settings"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".RegisterActivity" />
+        <activity android:name=".StartActivity">
+
+        </activity>
+
+        <receiver
+            android:name=".ReminderBR"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":remote">
+            <intent-filter>
+
+                <action android:name="DELETE_ACTION"/>
+            </intent-filter>
+
+
+        </receiver>
+        <receiver
+            android:name=".ReminderBr_this"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":remote"
+            >
+
+        </receiver>
+
+    </application>
+
+</manifest>
