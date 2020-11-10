@@ -1,10 +1,13 @@
 package com.example.Todo_List_Demo;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -26,9 +29,19 @@ Button Register,Login;
     public static boolean DarkMode;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences  sh1 = getApplicationContext().getSharedPreferences("MySwitch", MODE_PRIVATE);
+        Boolean s1 = sh1.getBoolean("switchTheme", false);
+        if(s1){
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+        else{
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 //setBackground();
+
         Email =(EditText) findViewById(R.id.EmailId);
         Password =(EditText) findViewById(R.id.Password);
         Register = (Button)findViewById(R.id.Register);
@@ -38,17 +51,22 @@ Button Register,Login;
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(StartActivity.this,RegisterActivity.class));
-                finish();
+
             }
         });
 
 
         LoginBtn.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
             @Override
             public void onClick(View view) {
+
                 String Text_email = Email.getText().toString();
                 String Text_password = Password.getText().toString();
-                LoginUser(Text_email,Text_password);
+                if(Text_email.isEmpty() || Text_password.isEmpty()){
+                    Toast.makeText(StartActivity.this,"Empty Credentials",Toast.LENGTH_LONG).show();
+                }else{
+                LoginUser(Text_email,Text_password);}
             }
         });
 

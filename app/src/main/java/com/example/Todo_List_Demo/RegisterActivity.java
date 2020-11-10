@@ -22,6 +22,7 @@ Button RegisterBtn;
 FirebaseAuth auth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
   Email =(EditText) findViewById(R.id.EmailId);
@@ -35,7 +36,7 @@ FirebaseAuth auth;
                 String Text_password = Password.getText().toString();
 
                 if(TextUtils.isEmpty(Text_email )|| TextUtils.isEmpty(Text_password)){
-                    Toast.makeText(RegisterActivity.this,"Empty Crendentiolls",Toast.LENGTH_LONG).show();
+                    Toast.makeText(RegisterActivity.this,"Empty Credentials",Toast.LENGTH_LONG).show();
 
                 }
                 else if(Text_password.length()<6){
@@ -48,6 +49,7 @@ FirebaseAuth auth;
                 }
             }
         });
+
     }
 
     private void registerUser(String email, String password) {
@@ -55,12 +57,12 @@ FirebaseAuth auth;
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()){
-                    Toast.makeText(RegisterActivity.this,"Reggistering user Successful",Toast.LENGTH_LONG).show();
+                    Toast.makeText(RegisterActivity.this,"Registering user Successful",Toast.LENGTH_LONG).show();
                     RegisterActivity.this.startActivity(new Intent(RegisterActivity.this,TODO.class));
                     RegisterActivity.this.finish();
                 }
                 else{
-                    Toast.makeText(RegisterActivity.this,"Reggistering Fail",Toast.LENGTH_LONG).show();
+                    Toast.makeText(RegisterActivity.this,"Registering Fail",Toast.LENGTH_LONG).show();
                 }
             }
         });

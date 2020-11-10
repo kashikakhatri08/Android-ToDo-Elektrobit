@@ -7,6 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
+    android:descendantFocusability="blocksDescendants"
     >
 
     <TextView
@@ -41,7 +42,8 @@
         android:layout_marginRight="61dp"
         android:onClick="delete"
         android:src="@drawable/ic_baseline_delete_24"
-        android:textColor="@color/textColor">
+        android:textColor="@color/textColor"
+        android:focusable="false">
 
     </ImageButton>
 
@@ -60,7 +62,8 @@
         android:paddingLeft="8dp"
         android:layout_alignParentLeft="true"
         android:focusable="false"
-        android:textColor="@color/textColor"/>
+        android:textColor="@color/textColor"
+       />
 
 
     <ImageButton
@@ -79,7 +82,8 @@
         android:layout_marginRight="113dp"
         android:onClick="edit"
         android:src="@drawable/ic_baseline_edit_24"
-        android:textColor="@color/textColor"/>
+        android:textColor="@color/textColor"
+        android:focusable="false"/>
 
     <ImageButton
         android:id="@+id/AlarmButton"
@@ -93,7 +97,8 @@
         android:layout_marginEnd="7dp"
         android:layout_marginRight="7dp"
         android:onClick="setAlarm"
-        android:src="@drawable/ic_baseline_alarm_24"
-        android:textColor="@color/textColor"/>
+        android:src="@drawable/ic_baseline_access_alarm_24"
+        android:textColor="@color/textColor"
+        android:focusable="false"/>
 
 </RelativeLayout>

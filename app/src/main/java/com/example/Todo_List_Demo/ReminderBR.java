@@ -28,7 +28,7 @@ public class ReminderBR extends BroadcastReceiver {
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         // Deliver the notification.
-        deliverNotification(context);
+        deliverNotification(context,intent);
 //deleteNotify(context,intent);
 
 
@@ -39,15 +39,16 @@ public class ReminderBR extends BroadcastReceiver {
      *
      * @param context, activity context.
      */
-    private void deliverNotification(Context context) {
+    private void deliverNotification(Context context,Intent intent) {
         // Create the content intent for the notification, which launches
         // this activity
         Intent contentIntent = new Intent(context, TODO.class);
-
+        int idalarm=intent.getExtras().getInt("idalarm1");
         PendingIntent contentPendingIntent = PendingIntent.getActivity
-                (context, Reminder_ID, contentIntent, PendingIntent
+                (context, idalarm, contentIntent, PendingIntent
                         .FLAG_UPDATE_CURRENT);
         // Build the notification
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder
                 (context, PRIMARY_CHANNEL_ID_TODO)
                 .setSmallIcon(android.R.drawable.ic_btn_speak_now)

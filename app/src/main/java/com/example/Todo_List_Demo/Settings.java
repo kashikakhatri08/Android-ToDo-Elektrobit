@@ -14,16 +14,21 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,6 +41,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+
 
 public class Settings extends AppCompatActivity  implements
         AdapterView.OnItemSelectedListener {
@@ -65,11 +71,24 @@ public class Settings extends AppCompatActivity  implements
             "primary_notification_channel_todo";
     String toastMessage;
     Button stop;
+    ArrayAdapter aa;
+    public static String Preference ="MyPrefrence";
     String[] minute = {"Select Time", "5" + " " + "min", "10" + " " + "min", "30" + " " + "min", "1" + " " + "hour", "3" + " " + "hour", "6" + " " + "hour", "12" + " " + "hour"};
-
+Switch switchtheam;
     @SuppressLint("SimpleDateFormat")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences  sh1 = getApplicationContext().getSharedPreferences("MySwitch", MODE_PRIVATE);
+        Boolean s1 = sh1.getBoolean("switchTheme", false);
+        if(s1){
+
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+        else{
+
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
+
         super.onCreate(savedInstanceState);
 
 
@@ -78,7 +97,7 @@ public class Settings extends AppCompatActivity  implements
 
         Spinner spin = (Spinner) findViewById(R.id.spinner);
         spin.setOnItemSelectedListener((AdapterView.OnItemSelectedListener) Settings.this);
-        ArrayAdapter aa = new ArrayAdapter(this, android.R.layout.simple_spinner_item, minute);
+       aa = new ArrayAdapter(this,R.layout.task_layout, minute);
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 
@@ -102,13 +121,50 @@ public class Settings extends AppCompatActivity  implements
         simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
         // alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        switchtheam=findViewById(R.id.themeSwitch);
+        if(s1){
+            switchtheam.setChecked(true);
+        }
+        else{
+            switchtheam.setChecked(false);
+        }
+        switchtheam.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
+                if(switchtheam.isChecked()) {
+                    switchtheam.setChecked(true);
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                }
+
+                else {
+                    switchtheam.setChecked(false);
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                }
+                SharedPreferences  sh1 = getApplicationContext().getSharedPreferences("MySwitch", MODE_PRIVATE);
+                SharedPreferences.Editor myEdit = sh1.edit();
+                myEdit.putBoolean("switchTheme", switchtheam.isChecked());
+                myEdit.commit();
+                SharedPreferences mPref=getSharedPreferences(Preference,0);
+                SharedPreferences.Editor editor=mPref.edit();
+                editor.putBoolean("DarkMode",switchtheam.isChecked());
+                editor.commit();
+            }
+        });
 
     }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(Settings.this,TODO.class)
+        );
+    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
+
 
         if (!minute[position].equals("Select Time")) {
 
@@ -118,31 +174,27 @@ public class Settings extends AppCompatActivity  implements
                 final String[] stringitemTextView = forarylist.split("\n");
                 final String itemTextView1 = stringitemTextView[0];
                 final String itemTextView2 = stringitemTextView[1];
+                final String itemTextView3 = stringitemTextView[2];
 
                 String spin_value = minute[position];
 
                 String[] string1 = spin_value.split(" ");
                 int itemreminder = Integer.parseInt(string1[0]);
 
-
                 try {
-                    Date date1 = simpleDateFormat.parse(itemTextView1 + " " + itemTextView2);
+                    Date date1 = simpleDateFormat.parse(itemTextView2+" "+itemTextView3);
+
                     c = Calendar.getInstance();
 
 //
 //
                     c.setTime(date1);
-                    c.add(Calendar.MONTH, +1);
+                   // c.add(Calendar.MONTH, +1);
 
                 } catch (Exception e) {
                     e.printStackTrace();
 
                 }
-                Intent notifyIntent = new Intent(Settings.this, ReminderBR.class);
-
-
-                PendingIntent notifyPendingIntent = PendingIntent.getBroadcast
-                        (Settings.this, Reminder_ID, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
                 if (minute[position].equals("5" + " " + "min") || minute[position].equals("10" + " " + "min") || minute[position].equals("30" + " " + "min")) {
@@ -153,6 +205,16 @@ public class Settings extends AppCompatActivity  implements
                     c.add(Calendar.HOUR_OF_DAY, -itemreminder);
                 }
 //If the Toggle is turned on, set the repeating alarm with a 15 minute interval
+
+
+
+                Intent notifyIntent = new Intent(Settings.this, ReminderBR.class);
+                notifyIntent.putExtra("idalarm1",(int)c.getTimeInMillis()+1);
+
+                PendingIntent notifyPendingIntent = PendingIntent.getBroadcast
+                        (Settings.this, (int)c.getTimeInMillis()+1, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
                 if (alarmManager != null) {
                     alarmManager.set(AlarmManager.RTC_WAKEUP,
                             c.getTimeInMillis(), notifyPendingIntent);
@@ -256,6 +318,7 @@ public class Settings extends AppCompatActivity  implements
         unregisterReceiver(mReceiver);
         super.onDestroy();
     }
+
 
     public class NotificationReceiver extends BroadcastReceiver {
 

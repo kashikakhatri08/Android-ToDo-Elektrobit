@@ -1,6 +1,5 @@
 package com.example.Todo_List_Demo;
 
-import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -10,7 +9,8 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
-import static android.content.Context.ALARM_SERVICE;
+import com.example.Todo_List_Demo.TODO;
+
 
 public class ReminderBr_this extends BroadcastReceiver {
 
@@ -26,7 +26,7 @@ public class ReminderBr_this extends BroadcastReceiver {
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         // Deliver the notification.
-        deliverNotification(context);
+        deliverNotification(context,intent);
 //        Intent notifyIntent = new Intent(context, ReminderBr_this.class);
 //        PendingIntent notifyPendingIntent = PendingIntent.getBroadcast
 //                (context, NOTIFICATION_ID_this, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -50,15 +50,24 @@ public class ReminderBr_this extends BroadcastReceiver {
      *
      * @param context, activity context.
      */
-    private void deliverNotification(Context context) {
+    private void deliverNotification(Context context,Intent intent) {
         // Create the content intent for the notification, which launches
         // this activity
-        Intent contentIntent = new Intent(context, TODO.class);
 
-        PendingIntent contentPendingIntent = PendingIntent.getActivity
-                (context, NOTIFICATION_ID_this, contentIntent, PendingIntent
+        /**
+         This flag is generally used by activies that want to present a launcher style
+         behavior:they give the user  *a list of separete things* that can be done
+         ,which otherwise run completely independently of the acitivity launching them
+         */
+
+        Intent contentIntent = new Intent(context, TODO.class);
+        int idalarm=intent.getExtras().getInt("idalarm");
+       // final int idalarm=(int) System.currentTimeMillis();
+       PendingIntent contentPendingIntent = PendingIntent.getActivity
+                (context, idalarm, contentIntent, PendingIntent
                         .FLAG_UPDATE_CURRENT);
         // Build the notification
+        Toast.makeText(context,"i am here hello",Toast.LENGTH_LONG).show();
         NotificationCompat.Builder builder = new NotificationCompat.Builder
                 (context, PRIMARY_CHANNEL_ID_this)
                 .setSmallIcon(android.R.drawable.ic_btn_speak_now)

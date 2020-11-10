@@ -5,4 +5,5 @@
         <color name="colorAccent">#03DAC5</color>
         <color name="colorBackground">#ffffff</color>
         <color name="textColor">#333232</color>
+        <color name="SpinnerTextcolor">#333232</color>
 </resources>

@@ -6,33 +6,21 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     android:id="@+id/main_layout"
     android:background="@color/colorBackground"
+    android:clickable="true"
     >
 
     <ListView
         android:id="@+id/listview"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
 
-
-
+android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="?android:attr/actionBarSize"
+android:clickable="true"
         android:layout_marginTop="29dp">
 
     </ListView>
-
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Change Theme"
-        android:id="@+id/themeSwitch"
-       android:onClick="switchMode"
-        android:textColor="@color/textColor"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-
 
 
 

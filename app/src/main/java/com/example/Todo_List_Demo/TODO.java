@@ -36,6 +36,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.auth.User;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -49,8 +51,12 @@ import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.room.Room;
 
+import android.os.SystemClock;
+import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
+import android.util.SparseBooleanArray;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -106,6 +112,8 @@ public class TODO extends AppCompatActivity   {
     //private CheckBox checkBoxbutton;
     private Date myDate;
 
+private   ArrayList<String> aryLst2;
+    private ArrayList<My_Item_List> lst;
     public static final String Extra_message1 = "com.example.setting.MESSAGE";
     public static final String alarm_message = "com.example.alarm.MESSAGE";
     public static final String Extra_message2 = "com.example.history.MESSAGE";
@@ -113,7 +121,7 @@ public class TODO extends AppCompatActivity   {
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private Switch switchtheam;
+
     private long l2;
     String[] spin_list = {"Select Time","5"+" "+"min","10"+" "+"min","30"+" "+"min","1"+" "+"hour","3"+" "+"hour","6"+" "+"hour","12"+" "+"hour"};
 
@@ -124,6 +132,7 @@ public class TODO extends AppCompatActivity   {
     private Calendar c1;
     String s1;
     String s2;
+    Boolean darkMode;
     private   DatabaseReference ref;
     String toastMessage;
     private AlarmManager alarmManager1;
@@ -145,7 +154,14 @@ String userId;
     @SuppressLint("SimpleDateFormat")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        SharedPreferences  sh1 = getApplicationContext().getSharedPreferences("MySwitch", MODE_PRIVATE);
+        Boolean s1 = sh1.getBoolean("switchTheme", false);
+        if(s1){
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+        else{
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
 
         super.onCreate(savedInstanceState);
 
@@ -157,44 +173,16 @@ String userId;
 
 
       setSupportActionBar(toolbar);
+
         ItemList = findViewById(R.id.listview);
         Delete = findViewById(R.id.DeleteButton);
         simpleTimeFormat=new SimpleDateFormat("MM/dd/yyyy hh:mm a");
-user=FirebaseAuth.getInstance().getCurrentUser();
+    user=FirebaseAuth.getInstance().getCurrentUser();
 if(user==null){
     return;
 }
 userId=user.getUid();
-        switchtheam=findViewById(R.id.themeSwitch);
-        switchtheam.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                  if(switchtheam.isChecked())
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
-
-else
-
-                      AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-
-              SharedPreferences  sh1 = getApplicationContext().getSharedPreferences("MySwitch", MODE_PRIVATE);
-                SharedPreferences.Editor myEdit = sh1.edit();
-   myEdit.putBoolean("switchTheme", switchtheam.isChecked());
-myEdit.commit();
-            }
-        });
-        SharedPreferences  sh1 = getApplicationContext().getSharedPreferences("MySwitch", MODE_PRIVATE);
-        Boolean s1 = sh1.getBoolean("switchTheme", false);
-        if (s1) {
-            switchtheam.setChecked(true);
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
-        } else {
-           switchtheam.setChecked(false);
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-
-        }
         currentTime = SimpleDateFormat.getDateTimeInstance().format(new Date());
         currentDate = Calendar.getInstance().getTime();
 
@@ -202,33 +190,36 @@ myEdit.commit();
         simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
         todayDate = simpleDateFormat.format(currentDate);
         SetupDB();
+        showItemList();
+
+
         RelativeLayout mainLayout1=(RelativeLayout)findViewById(R.id.main_layout);
         LayoutInflater inflater1=getLayoutInflater();
         View myLayout1=inflater1.inflate(R.layout.item_list,mainLayout1,false);
 
-        firebaseListOptions=new FirebaseListOptions.Builder<My_Item_List>()
-                .setQuery(FirebaseDatabase.getInstance().getReference().child("My Todo").child(userId),My_Item_List.class)
-                .setLayout(R.layout.item_list)
-                .build();
-
-       listAdapter=new FirebaseListAdapter<My_Item_List>(firebaseListOptions) {
-            @Override
-            protected void populateView(@NonNull View v, @NonNull My_Item_List model, int position) {
-                TextView textView=(TextView) v.findViewById(R.id.item_title);
-                CheckBox checkBox=(CheckBox) v.findViewById(R.id.todocheck);
-                textView.setText(model.getItem()+"\n"+model.getDate());
-                checkBox.setChecked(model.isChecked());
-
-            }
-
-
-        };
-        ItemList.setAdapter(listAdapter);
+//        firebaseListOptions=new FirebaseListOptions.Builder<My_Item_List>()
+//                .setQuery(FirebaseDatabase.getInstance().getReference().child("My Todo").child(userId),My_Item_List.class)
+//                .setLayout(R.layout.item_list)
+//                .build();
+//
+//       listAdapter=new FirebaseListAdapter<My_Item_List>(firebaseListOptions) {
+//            @Override
+//            protected void populateView(@NonNull View v, @NonNull My_Item_List model, int position) {
+//                TextView textView=(TextView) v.findViewById(R.id.item_title);
+//                CheckBox checkBox=(CheckBox) v.findViewById(R.id.todocheck);
+//                textView.setText(model.getItem()+"\n"+model.getDate());
+//                checkBox.setChecked(model.isChecked());
+//
+//            }
+//
+//
+//        };
+//        ItemList.setAdapter(listAdapter);
 
         simpleDate1=new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
        // showItemList();
-
+aryLst2=new ArrayList<>();
 
 
         myNotificationManager = (NotificationManager)
@@ -239,6 +230,11 @@ myEdit.commit();
         alarmManager1 = (AlarmManager) getSystemService(ALARM_SERVICE);
         registerReceiver(mReceiver, new IntentFilter(ACTION_UPDATE_NOTIFICATION));
 
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build();
+        firestore.setFirestoreSettings(settings);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -249,10 +245,16 @@ myEdit.commit();
 
                 final LinearLayout layout = new LinearLayout(TODO.this);
                 layout.setOrientation(LinearLayout.VERTICAL);
-
+itemEditText.setTextColor(getResources().getColor(R.color.textColor));
+itemEditText.setHint("Enter TODO Item");
+itemEditText.setHintTextColor(Color.GRAY);
                 layout.addView(itemEditText);
 
                 dateEditText.setClickable(true);
+                dateEditText.setTextColor(getResources().getColor(R.color.textColor));
+                dateEditText.setHint("Click here to add Date and Time");
+                dateEditText.setHintTextColor(Color.GRAY);
+
                 dateEditText.setFocusable(false);
                 dateEditText.setInputType(InputType.TYPE_NULL);
                 dateEditText.setOnClickListener(new View.OnClickListener() {
@@ -268,20 +270,22 @@ myEdit.commit();
                         DatePickerDialog datePickerDialog = new DatePickerDialog(TODO.this, new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker datePicker, final int i, final int i1, final int i2) {
-                                dateEditText.setText(i2+"-"+i1+"-"+i);
+                                int monthplus=i1+1;
+                                dateEditText.setText(i2+"/"+monthplus+"/"+i);
+
                                 final int this_year=i;
-                                final int this_month=i1;
+                                final int this_month=i1+1;
                                 final int this_day=i2;
                                 Calendar this_c = Calendar.getInstance();
-                                year = this_c.get(Calendar.HOUR_OF_DAY);
-                                month = this_c.get(Calendar.MINUTE);
+                                mHour = this_c.get(Calendar.HOUR_OF_DAY);
+                                mMinute = this_c.get(Calendar.MINUTE);
                                 TimePickerDialog mTimePicker;
                                 mTimePicker = new TimePickerDialog(TODO.this, new TimePickerDialog.OnTimeSetListener() {
                                     @SuppressLint("SetTextI18n")
                                     @Override
                                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
 
-                                        dateEditText.setText(this_day+"/"+this_month+"/"+this_year+"\n"+selectedHour+":"+selectedMinute);
+                                        dateEditText.setText(this_day+"/"+this_month+"/"+this_year+"\n"+String.format("%02d:%02d", selectedHour, selectedMinute));
                  }
                                 }, mHour, mMinute, false);//Yes 24 hour time
                                 mTimePicker.setTitle("Select Time");
@@ -294,13 +298,19 @@ myEdit.commit();
 
                     } });
                 layout.addView(dateEditText);
-                AlertDialog dialog = new AlertDialog.Builder(TODO.this)
+                AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(TODO.this,R.style.DialogStyle))
                         .setTitle("Add new Todo")
-                        .setMessage("What's next?")
+                        .setMessage(Html.fromHtml("<font color='#FF0000'>What's next?</font>"))
+
 
                         .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
+                                String textValue = itemEditText.getText().toString().trim();
+                                String dateValue = dateEditText.getText().toString().trim();
+                                if (textValue.isEmpty() || dateValue.isEmpty()) {
+
+                                } else {
                                 String Item = String.valueOf(itemEditText.getText());
                                 String date = String.valueOf(dateEditText.getText());
                                 My_Item_List newItem = new My_Item_List(Item, date, false);
@@ -315,7 +325,7 @@ myEdit.commit();
                                 ref=firebaseDatabase.getReference("My Todo");
 
                                 ref.child(userId).push().setValue(newItem);
-                                Toast.makeText(TODO.this, "values added to Firebase Storage successfully", Toast.LENGTH_LONG).show();
+                               // Toast.makeText(TODO.this, "values added to Firebase Storage successfully", Toast.LENGTH_LONG).show();
 
 
                                 FirebaseFirestore db =FirebaseFirestore.getInstance();
@@ -327,7 +337,7 @@ myEdit.commit();
             public void onComplete(@NonNull Task<DocumentReference> task) {
                 if(task.isSuccessful()){
 
-                    Toast.makeText(TODO.this,"values added to cloud successfully",Toast.LENGTH_LONG).show();
+                  //  Toast.makeText(TODO.this,"values added to cloud successfully",Toast.LENGTH_LONG).show();
 
                 }
             }
@@ -335,7 +345,7 @@ myEdit.commit();
 
 
                                 showItemList();
-                            }
+                            }}
                         })
 
 
@@ -345,6 +355,18 @@ myEdit.commit();
 
                 dialog.setView(layout);
                 dialog.show();
+                String textValue= itemEditText.getText().toString();
+                String dateValue=dateEditText.getText().toString();
+                if(textValue.isEmpty() || dateValue.isEmpty()){
+                    if(textValue.isEmpty()){
+                        itemEditText.setError("field cannot be empty");
+                    }
+
+
+
+
+
+            }
 
             }
         });
@@ -363,23 +385,56 @@ myEdit.commit();
 
     private void showItemList() {
 
-            List<My_Item_List> list = db.dao().getItem();
-if(adapter==null) {
+           List<My_Item_List>  list = db.dao().getItem();
 
-    adapter = new UserAdapter(this, (ArrayList<My_Item_List>) list);
-    ItemList.setAdapter(adapter);
-    adapter.notifyDataSetChanged();
-}
-else{
-    adapter.clear();
+        for (int i = 0; i < list.size(); i++) {
+            if(list.get(i).isChecked()){
 
 
-    adapter.addAll(list);
 
-    adapter.notifyDataSetChanged();
+list.remove(list.get(i));
+
+            }
+        }
+//        lst = new ArrayList<>(list.size());
+//        lst.addAll(list);
+//        ArrayList<String> aryLst = new ArrayList<String>();
+//        for (int i = 0; i < lst.size(); i++) {
+//            if(lst.get(i).isChecked()) {
+//               lst.remove(i);
+////                aryLst.add(lst.get(i).getDate());
+////                aryLst.add(lst.get(i).isChecked());
+//            }
+//
+//        }
+
+        adapter = new UserAdapter(this, (ArrayList<My_Item_List>) list);
+
+        ItemList.setAdapter(adapter);
 
 
-}
+adapter.notifyDataSetChanged();
+
+
+
+
+
+
+  //  adapter.clear();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         }
 
@@ -422,14 +477,25 @@ else{
         String[] string = itemTextString.split("\n");
         final String item1 = string[0];
         final String item2 = string[1];
-        CheckBox checkbox = (CheckBox) parent.findViewById(R.id.todocheck);
+        final String item3 = string[2];
+        final CheckBox checkbox = (CheckBox) parent.findViewById(R.id.todocheck);
 
         checkbox.setChecked(checkbox.isChecked());
         db.dao().updateCheckbox(checkbox.isChecked(), item1);
+        aryLst2.add(item1 + "\n" + item2+"\n"+item3);
+       showItemList();
 
 
-      databaseReference.child("TODO List").child(UserData).child("checkbox Value").setValue(checkbox.isChecked());
-        Toast.makeText(this, String.valueOf(checkbox.isChecked()), Toast.LENGTH_LONG);
+       if(checkbox.isChecked())
+        db.dao().DeleteItem(item1);
+
+//int count=adapter.getCount();
+//for(int i=0;i<count;i++){
+//    if(adapter.getItem(i)==list.get(i).isChecked){}
+//}
+
+
+
 
     }
 
@@ -439,6 +505,9 @@ else{
 
 
 
+
+
+    @SuppressLint("ResourceAsColor")
     public void edit(View view) {
         View parent = (View) view.getParent();
         TextView itemTextView = (TextView) parent.findViewById(R.id.item_title);
@@ -447,49 +516,63 @@ else{
         String[] string = itemTextString.split("\n");
         final String item1 = string[0];
         final String item2 = string[1];
-        final String item3 = string[1];
-
+        final String item3 = string[2];
+        String[] string1 = item2.split("/");
+        final int myday = Integer.parseInt(string1[0]);
+        final int mymonth = Integer.parseInt(string1[1]);
+        final int myyear = Integer.parseInt(string1[2]);
+        String[] string2 = item3.split(":");
+        final int myHour = Integer.parseInt(string2[0]);
+        final int myMinute = Integer.parseInt(string2[1]);
 
         final EditText itemUpdateText = new EditText(TODO.this);
         final EditText dateUpdateText = new EditText(TODO.this);
-
+        itemUpdateText.setText(item1);
+        itemUpdateText.setTextColor(Color.GRAY);
         LinearLayout layout = new LinearLayout(TODO.this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
         layout.addView(itemUpdateText);
 
         dateUpdateText.setClickable(true);
+        dateUpdateText.setText(item2+" "+item3);
         dateUpdateText.setFocusable(false);
         dateUpdateText.setInputType(InputType.TYPE_NULL);
+        dateUpdateText.setTextColor(Color.GRAY);
         dateUpdateText.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 Calendar mcurrentcalender = Calendar.getInstance();
-                year = mcurrentcalender.get(Calendar.YEAR);
-                month = mcurrentcalender.get(Calendar.MONTH);
-                day = mcurrentcalender.get(Calendar.DAY_OF_MONTH);
+                year = myyear;
+                month =mymonth-1;
+                day = myday;
                 DatePickerDialog datePickerDialog = new DatePickerDialog(TODO.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, final int i, final int i1, final int i2) {
-                        dateUpdateText.setText(i2+"-"+i1+"-"+i);
+                        int monthplus=i1;
+                        dateUpdateText.setText(i2+"/"+monthplus+"/"+i);
+
                         final int this_year=i;
                         final int this_month=i1;
                         final int this_day=i2;
                         Calendar this_c = Calendar.getInstance();
-                        year = this_c.get(Calendar.HOUR_OF_DAY);
-                        month = this_c.get(Calendar.MINUTE);
+                        mHour = myHour;
+                        mMinute = myMinute;
                         TimePickerDialog mTimePicker;
                         mTimePicker = new TimePickerDialog(TODO.this, new TimePickerDialog.OnTimeSetListener() {
                             @SuppressLint("SetTextI18n")
                             @Override
                             public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
 
-                                dateUpdateText.setText(this_day+"/"+this_month+"/"+this_year+"\n"+selectedHour+":"+selectedMinute);
+
+                                dateUpdateText.setText(this_day+"/"+this_month+"/"+this_year+"\n"+String.format("%02d:%02d", selectedHour, selectedMinute));
 
                             }
-                        }, mHour, mMinute, false);//Yes 24 hour time
+                        }, mHour, mMinute, false);
+
+
                         mTimePicker.setTitle("Select Time");
                         mTimePicker.show();
 
@@ -500,19 +583,25 @@ else{
 //
             } });
         layout.addView(dateUpdateText);
-        AlertDialog dialog = new AlertDialog.Builder(TODO.this)
+        AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(TODO.this,R.style.DialogStyle))
                 .setTitle("Edit Todo")
                 .setMessage("What's the Change?")
+                .setMessage(Html.fromHtml("<font color='#FF0000'>What's next?</font>"))
                 .setPositiveButton("Edit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        String Item = String.valueOf(itemUpdateText.getText());
-                        String date = String.valueOf(dateUpdateText.getText());
-                        //    ItemList1 newItem = new ItemList1(Item,date,false);
+                        String textValue = itemUpdateText.getText().toString().trim();
+                        String dateValue = dateUpdateText.getText().toString().trim();
+                        if (textValue.isEmpty() || dateValue.isEmpty()) {
 
-                        db.dao().updateItem(Item, date, item1);
-        showItemList();
+                        } else {
+                            String Item = String.valueOf(itemUpdateText.getText());
+                            String date = String.valueOf(dateUpdateText.getText());
+                            //    ItemList1 newItem = new ItemList1(Item,date,false);
 
+                            db.dao().updateItem(Item, date, item1);
+                            showItemList();
+                        }
 
                     }
                 })
@@ -520,6 +609,18 @@ else{
                 .create();
         dialog.setView(layout);
         dialog.show();
+        String textValue= itemUpdateText.getText().toString();
+        String dateValue=dateUpdateText.getText().toString();
+        if(textValue.isEmpty() || dateValue.isEmpty()){
+            if(textValue.isEmpty()){
+                itemUpdateText.setError("field cannot be empty");
+            }
+
+
+        }
+
+
+
 
     }
 
@@ -589,17 +690,14 @@ public void setAlarm(View view){
 //
 //
 c2.setTime(date1);
-c2.add(Calendar.MONTH,+1);
+//c2.add(Calendar.MONTH,+1);
 
                     }
                         catch (Exception e) {
        e.printStackTrace();
 
     }
-                        Intent notifyIntent = new Intent(TODO.this, ReminderBr_this.class);
 
-                        PendingIntent notifyPendingIntent = PendingIntent.getBroadcast
-                                (TODO.this, NOTIFICATION_ID_this, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
                         if(spin_list[i].equals("5" + " " + "min") || spin_list[i].equals("10" + " " + "min") || spin_list[i].equals("30" + " " + "min")){
                             c2.add(Calendar.MINUTE,-itemreminder);
@@ -607,14 +705,22 @@ c2.add(Calendar.MONTH,+1);
                         }else if(spin_list[i].equals("1" + " " + "hour") || spin_list[i].equals("3" + " " + "hour") ||spin_list[i].equals("6" + " " + "hour") || spin_list[i].equals("12" + " " + "hour")){
                             c2.add(Calendar.HOUR_OF_DAY,-itemreminder);
                         }
+                        Intent notifyIntent = new Intent(TODO.this, ReminderBr_this.class);
+                        notifyIntent.putExtra("idalarm",(int)c2.getTimeInMillis());
+                        PendingIntent notifyPendingIntent = PendingIntent.getBroadcast(TODO.this, (int)c2.getTimeInMillis(), notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
                         if (alarmManager1 != null) {
                             alarmManager1.set(AlarmManager.RTC_WAKEUP,
                                     c2.getTimeInMillis(),notifyPendingIntent);
                             alarm_mode=true;
                         }
-                       
+                        else{
+                            alarm_mode=false;
+                        }
+
                     }
                 Intent updateIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
+
                 PendingIntent updatePendingIntent = PendingIntent.getBroadcast
                         (TODO.this, NOTIFICATION_ID_SET, updateIntent, PendingIntent.FLAG_ONE_SHOT);
 
@@ -660,8 +766,9 @@ c2.add(Calendar.MONTH,+1);
     @Override
     public void onClick(DialogInterface dialogInterface, int i) {
         Intent notifyIntent = new Intent(TODO.this, ReminderBr_this.class);
+        final int idalarm=(int) System.currentTimeMillis();
         PendingIntent notifyPendingIntent = PendingIntent.getBroadcast
-                (TODO.this, NOTIFICATION_ID_this, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                (TODO.this, idalarm, notifyIntent,  PendingIntent.FLAG_UPDATE_CURRENT);
         myNotificationManager.cancelAll();
 
 
@@ -735,20 +842,27 @@ c2.add(Calendar.MONTH,+1);
         // as you specify a parent activity in AndroidManifest.xml.
 
         int id = item.getItemId();
-        List<My_Item_List> list = db.dao().getItem();
+         List<My_Item_List> list = db.dao().getItem();
+
         ArrayList<My_Item_List> lst = new ArrayList<>(list.size());
         lst.addAll(list);
 
         ArrayList<String> aryLst1 = new ArrayList<String>();
+        ArrayList<String> aryLst3 = new ArrayList<String>();
+        ArrayList<String> aryLst4 = new ArrayList<String>();
         for (int i = 0; i < lst.size(); i++) {
-            aryLst1.add(lst.get(i).getDate());
+
+            aryLst1.add(lst.get(i).getItem()+"\n"+lst.get(i).getDate());
         }
 
-        ArrayList<String> aryLst2 = new ArrayList<String>();
-        for (int i = 0; i < lst.size(); i++) {
-            aryLst2.add(lst.get(i).getItem() + "\n" + lst.get(i).getDate());
+
+        for (int i = 0; i < aryLst2.size(); i++) {
+
+            aryLst3.add(aryLst2.get(i));
+
         }
 
+aryLst4.addAll(aryLst3);
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent settingsIntent = new Intent(this,
@@ -761,7 +875,7 @@ c2.add(Calendar.MONTH,+1);
         if (id == R.id.action_history) {
             Intent historysIntent = new Intent(this,
                     MyHistory.class);
-            historysIntent.putExtra(Extra_message2, aryLst2);
+            historysIntent.putExtra(Extra_message2, aryLst4);
             startActivity(historysIntent);
 
             return true;
@@ -771,6 +885,7 @@ c2.add(Calendar.MONTH,+1);
             FirebaseAuth.getInstance().signOut();
             Toast.makeText(TODO.this, "LogOut", Toast.LENGTH_LONG).show();
             startActivity(new Intent(TODO.this, StartActivity.class));
+            finish();
         }
 
 
